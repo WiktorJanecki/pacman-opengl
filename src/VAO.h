@@ -1,10 +1,11 @@
 #pragma once
+#include <glad/glad.h>
 
 class VAO{
 public:
-    VAO();
-    auto bind() -> void;
-    auto unbind() -> void;
+    explicit VAO();
+    auto bind() const-> void;
+    auto unbind() const-> void;
 private:
-    unsigned int m_id;
+    GLuint m_id = 0;
 };

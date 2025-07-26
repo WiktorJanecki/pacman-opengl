@@ -3,6 +3,6 @@
 
 int main() {
     std::cout << "Hello\n";
-    GameLoop gl;
+    GameLoop _gl;
     return 0;
 }

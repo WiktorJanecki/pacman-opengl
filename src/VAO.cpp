@@ -1,19 +1,15 @@
-//
-// Created by Wigtor on 13.07.2025.
-//
-
 #include "VAO.h"
 
 #include <glad/glad.h>
 
 VAO::VAO() {
-    glGenVertexArrays(1,&m_id);
+    glGenVertexArrays(1, &m_id);
 }
 
-auto VAO::bind() -> void {
+auto VAO::bind() const -> void {
     glBindVertexArray(m_id);
 }
 
-auto VAO::unbind() -> void {
+auto VAO::unbind() const -> void {
     glBindVertexArray(0);
 }

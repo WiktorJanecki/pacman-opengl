@@ -1,10 +1,13 @@
 #pragma once
 
-class Shader{
+class Shader {
 public:
-    Shader(const char* vertex_src, const char* fragment_src);
-    auto bind() -> void;
-    auto unbind() -> void;
+    Shader(const char *vertex_src, const char *fragment_src);
+
+    auto bind() const -> void;
+
+    auto unbind() const -> void;
+
 private:
     int m_id;
 };
