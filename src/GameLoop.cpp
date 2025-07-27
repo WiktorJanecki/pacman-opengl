@@ -4,6 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 
 #include "Settings.h"
 #include "Shader.h"
@@ -30,7 +34,7 @@ GameLoop::GameLoop() {
     gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glEnable(GL_BLEND);;
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     loop();
 }
@@ -56,12 +60,16 @@ auto GameLoop::loop() -> void {
         layout (location = 0) in vec3 pos;
         layout (location = 1) in vec2 uv;
 
+        uniform mat4 u_model;
+        uniform mat4 u_view;
+        uniform mat4 u_projection;
+
         out vec2 out_uv;
 
         void main()
         {
             out_uv = uv;
-            gl_Position = vec4(pos.xyz, 1.0);
+            gl_Position = u_projection * u_view * u_model * vec4(pos.xyz, 1.0);
         }
     )";
     Shader shader(default_vert, default_frag);
@@ -85,6 +93,20 @@ auto GameLoop::loop() -> void {
         1,1,
         1,0
     };
+
+    glm::vec3 pos{0.0f,0.0f,0.0f};
+    auto transformation = glm::identity<glm::mat4>();
+    transformation = glm::translate(transformation,{0.5f,0.5f,-2.0f});
+    transformation = glm::rotate(transformation,3.14f/2.0f,{1.f,0.f,1.f});
+    shader.setUniform("u_model",transformation);
+
+    auto fov{glm::radians(45.0f)};
+    auto aspect_ratio = static_cast<float>(WINDOW_WIDTH)/static_cast<float>(WINDOW_HEIGHT);
+    glm::mat4 proj = glm::perspective(fov, aspect_ratio, 0.1f, 100.0f);
+    shader.setUniform("u_projection",proj);
+
+    auto view =  glm::identity<glm::mat4>();
+    shader.setUniform("u_view",view);
 
 
     VAO vao;

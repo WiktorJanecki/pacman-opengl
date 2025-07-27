@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <glad/glad.h>
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace {
     auto logShaderCompilationError(GLuint shader_id) {
         int success;
@@ -54,4 +57,22 @@ auto Shader::bind() const -> void {
 
 auto Shader::unbind() const -> void {
     glUseProgram(0);
+}
+
+auto Shader::setUniform(const char *name, glm::mat4 value) const -> void {
+    const auto location = glGetUniformLocation(m_id, name);
+    bind();
+    glUniformMatrix4fv(location,1,GL_FALSE,glm::value_ptr(value));
+}
+
+auto Shader::setUniform(const char *name, float value) const -> void {
+    const auto location = glGetUniformLocation(m_id, name);
+    bind();
+    glUniform1f(location,value);
+}
+
+auto Shader::setUniform(const char *name, int value) const -> void {
+    const auto location = glGetUniformLocation(m_id, name);
+    bind();
+    glUniform1i(location,value);
 }
