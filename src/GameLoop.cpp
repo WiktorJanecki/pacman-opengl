@@ -7,14 +7,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <cmath>
 
 #include "Settings.h"
 #include "Shader.h"
-#include "VAO.h"
-#include "VBO.h"
-#include "EBO.h"
-#include "Texture.h"
+#include "Sprite.h"
+#include "SpriteRenderer.h"
 
 GameLoop::GameLoop() {
     glfwInit();
@@ -40,97 +37,18 @@ GameLoop::GameLoop() {
 }
 
 auto GameLoop::loop() -> void {
-    // TODO: move
-    const auto default_frag = R"(
-        #version 330 core
-        in vec2 out_uv;
-        out vec4 FragColor;
-
-        uniform sampler2D ourTexture;
-
-
-        void main()
-        {
-            vec4 color = texture(ourTexture,out_uv);
-            FragColor = color;
-        }
-    )";
-    const auto default_vert = R"(
-        #version 330 core
-        layout (location = 0) in vec3 pos;
-        layout (location = 1) in vec2 uv;
-
-        uniform mat4 u_model;
-        uniform mat4 u_view;
-        uniform mat4 u_projection;
-
-        out vec2 out_uv;
-
-        void main()
-        {
-            out_uv = uv;
-            gl_Position = u_projection * u_view * u_model * vec4(pos.xyz, 1.0);
-        }
-    )";
-    Shader shader(default_vert, default_frag);
-
-    std::array vertices{
-        -1.f, -1.f, 0.0f,
-        -1.f, 1.f, 0.0f,
-        1.f, 1.f, 0.0f,
-        1.f, -1.f, 0.0f
-    };
-    for (auto &v: vertices) { v *= 0.5f; }
-
-    std::array<unsigned int, 6> indices{
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    std::array<float,8> uv{
-        0.0f,0,
-        0,1,
-        1,1,
-        1,0
-    };
-
-    glm::vec3 pos{0.0f,0.0f,0.0f};
-    auto transformation = glm::identity<glm::mat4>();
-    transformation = glm::translate(transformation,{0.5f,0.5f,-2.0f});
-    transformation = glm::rotate(transformation,3.14f/2.0f,{1.f,0.f,1.f});
-    shader.setUniform("u_model",transformation);
-
-    auto fov{glm::radians(45.0f)};
-    auto aspect_ratio = static_cast<float>(WINDOW_WIDTH)/static_cast<float>(WINDOW_HEIGHT);
-    glm::mat4 proj = glm::perspective(fov, aspect_ratio, 0.1f, 100.0f);
-    shader.setUniform("u_projection",proj);
-
-    auto view =  glm::identity<glm::mat4>();
-    shader.setUniform("u_view",view);
-
-
-    VAO vao;
-    VBO vbo{vertices};
-    VBO tbo{uv};
-    EBO ebo{indices};
-    Texture texture{"./assets/player.png"};
-
-    // setup vao
-    vao.bind();
-    glActiveTexture(GL_TEXTURE0);
-    texture.bind();
-    ebo.bind();
-    vbo.bind();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(0);
-    tbo.bind();
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(1);
-
-    vao.unbind();
-
-
-    m_timer = glfwGetTime();
+    SpriteRenderer renderer;
+    Sprite sprite1{};
+    sprite1.m_position.x = 2.0f;
+    sprite1.m_rotation.x = 45.0f;
+    Sprite sprite2{};
+    sprite1.m_position.x = -1.0f;
+    sprite1.m_position.y = -1.0f;
+    sprite1.m_position.z = -1.0f;
+    sprite1.m_rotation.z = 45.0f;
+    renderer.m_sprites.emplace_back(sprite1);
+    renderer.m_sprites.emplace_back(sprite2);
+     m_timer = glfwGetTime();
 
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
@@ -143,17 +61,7 @@ auto GameLoop::loop() -> void {
         }
         m_frames++;
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        shader.bind();
-        vao.bind();
-
-        glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, nullptr);
-
-        shader.unbind();
-        vao.unbind();
+        renderer.render();
 
         glfwSwapBuffers(m_window);
     }

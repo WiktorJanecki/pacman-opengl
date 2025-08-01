@@ -4,12 +4,12 @@ class GLFWwindow;
 
 class GameLoop {
 public:
-    GameLoop();
+  GameLoop();
+
 private:
-    GLFWwindow* m_window;
-    int m_frames{0};
-    double m_timer{0.0};
+  GLFWwindow *m_window;
+  int m_frames{0};
+  double m_timer{0.0};
 
-    auto loop() -> void;
-
+  auto loop() -> void;
 };
