@@ -10,7 +10,7 @@ find_package(glfw3 REQUIRED)
 find_package(stb REQUIRED)
 find_package(glm REQUIRED)
 
-add_executable(pacman_opengl src/main.cpp src/GameLoop.cpp src/Shader.cpp src/VAO.cpp src/Texture.cpp src/SpriteRenderer.cpp src/Sprite.cpp)
+add_executable(pacman_opengl src/Main.cpp src/GameLoop.cpp src/Shader.cpp src/VAO.cpp src/Texture.cpp src/SpriteRenderer.cpp src/Sprite.cpp)
 target_link_libraries(pacman_opengl glfw glad::glad stb::stb glm::glm)
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
