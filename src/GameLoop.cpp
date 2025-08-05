@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "Sprite.h"
 #include "SpriteRenderer.h"
+#include "TextureAtlas.h"
 
 GameLoop::GameLoop() {
     glfwInit();
@@ -19,6 +20,7 @@ GameLoop::GameLoop() {
     // crash if 3.3 not supported
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(1280, 720);
 
     // don't include IMMEDIATE subset of opengl (glBegin etc.)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -46,9 +48,11 @@ auto GameLoop::loop() -> void {
     sprite1.m_position.y = -1.0f;
     sprite1.m_position.z = -1.0f;
     sprite1.m_rotation.z = 45.0f;
-    renderer.m_sprites.emplace_back(sprite1);
-    renderer.m_sprites.emplace_back(sprite2);
-     m_timer = glfwGetTime();
+	sprite2.m_sourceUV = {0,32,64,32};
+    std::array sprites{sprite1,sprite2};
+    m_timer = glfwGetTime();
+
+	TextureAtlas atlas(64,64);
 
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
@@ -61,7 +65,7 @@ auto GameLoop::loop() -> void {
         }
         m_frames++;
 
-        renderer.render();
+        renderer.render(sprites);
 
         glfwSwapBuffers(m_window);
     }

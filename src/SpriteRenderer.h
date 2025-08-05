@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <span>
 
 #include "Shader.h"
 #include "Texture.h"
@@ -12,10 +12,9 @@ class SpriteRenderer {
 public:
     SpriteRenderer();
 
-    auto render() const -> void;
+    auto render(const std::span<Sprite>& sprites) const -> void;
 
     Shader m_shader;
-    std::vector<Sprite> m_sprites;
 private:
     Texture m_texture;
     VAO m_vao{};

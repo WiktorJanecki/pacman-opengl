@@ -1,19 +1,22 @@
 #include "SpriteRenderer.h"
 
 #include <array>
+#include <span>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "EBO.h"
 #include "Settings.h"
 #include "Sprite.h"
+#include "TextureAtlas.h"
 #include "VBO.h"
 
 namespace {
     constexpr char vertex_src[] = R"(
         #version 330 core
         layout (location = 0) in vec3 pos;
-        layout (location = 1) in vec2 uv;
+		layout (location = 1) in vec2 uv;
 
         uniform mat4 u_model;
         uniform mat4 u_view;
@@ -71,9 +74,9 @@ SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src},
     vbo.bind();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
-    tbo.bind();
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(1);
+    // tbo.bind();
+    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    // glEnableVertexAttribArray(1);
     ebo.bind();
     glActiveTexture(GL_TEXTURE0);
     m_texture.bind();
@@ -88,17 +91,30 @@ SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src},
     auto view = glm::identity<glm::mat4>();
     view = glm::translate(view, {0.0f,0.0f,-5.0f});
     m_shader.setUniform("u_view", view);
+
 }
 
-auto SpriteRenderer::render() const -> void {
+auto SpriteRenderer::render(const std::span<Sprite>& sprites) const -> void {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	auto atlas = TextureAtlas(64,64);
     m_shader.bind();
     m_vao.bind();
 
-    for (const auto & sprite : m_sprites ) {
+    for (const auto & sprite : sprites ) {
+
+		auto [start, end] = atlas.getUv(sprite.m_sourceUV.x,sprite.m_sourceUV.y,sprite.m_sourceUV.z,sprite.m_sourceUV.w);
+		std::array uvs = {
+			start.x, start.y,
+			start.x, end.y,
+			end.x,   end.y,
+			end.x,   start.y
+		};
+		VBO tbo{uvs};
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glEnableVertexAttribArray(1);
 
         auto transformation = glm::identity<glm::mat4>();
         auto scale = glm::vec3{sprite.m_scale,1.0f};
@@ -110,6 +126,7 @@ auto SpriteRenderer::render() const -> void {
         m_shader.setUniform("u_model",transformation);
 
         glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, nullptr);
+		tbo.unbind();
     }
 
     m_shader.unbind();
