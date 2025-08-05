@@ -62,9 +62,7 @@ namespace {
     };
 }
 
-SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src},
-                                   m_texture{Texture{"assets/player.png"}} {
-
+SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src} {
     VBO vbo{vertices};
     VBO tbo{uv};
     EBO ebo{indices};
@@ -78,8 +76,6 @@ SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src},
     // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     // glEnableVertexAttribArray(1);
     ebo.bind();
-    glActiveTexture(GL_TEXTURE0);
-    m_texture.bind();
 
     m_vao.unbind();
 
@@ -94,17 +90,16 @@ SpriteRenderer::SpriteRenderer() : m_shader{vertex_src, fragment_src},
 
 }
 
-auto SpriteRenderer::render(const std::span<Sprite>& sprites) const -> void {
+auto SpriteRenderer::render(const std::span<Sprite>& sprites, const TextureAtlas& atlas) const -> void {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	auto atlas = TextureAtlas(64,64);
     m_shader.bind();
     m_vao.bind();
+	atlas.bind();
 
     for (const auto & sprite : sprites ) {
-
 		auto [start, end] = atlas.getUv(sprite.m_sourceUV.x,sprite.m_sourceUV.y,sprite.m_sourceUV.z,sprite.m_sourceUV.w);
 		std::array uvs = {
 			start.x, start.y,

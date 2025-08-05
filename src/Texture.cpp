@@ -25,3 +25,11 @@ auto Texture::bind() const -> void {
 auto Texture::unbind() const -> void {
     glBindTexture(GL_TEXTURE_2D,0);
 }
+
+auto Texture::getWidth() const -> int32_t{
+	return m_width;
+}
+
+auto Texture::getHeight() const -> int32_t{
+	return m_height;
+}

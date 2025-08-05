@@ -9,7 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Settings.h"
-#include "Shader.h"
 #include "Sprite.h"
 #include "SpriteRenderer.h"
 #include "TextureAtlas.h"
@@ -29,6 +28,9 @@ GameLoop::GameLoop() {
 
     m_window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
     glfwMakeContextCurrent(m_window);
+	
+	// vsync
+	glfwSwapInterval(0);
 
     gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -40,6 +42,7 @@ GameLoop::GameLoop() {
 
 auto GameLoop::loop() -> void {
     SpriteRenderer renderer;
+	TextureAtlas atlas{"assets/player.png"};
     Sprite sprite1{};
     sprite1.m_position.x = 2.0f;
     sprite1.m_rotation.x = 45.0f;
@@ -52,8 +55,6 @@ auto GameLoop::loop() -> void {
     std::array sprites{sprite1,sprite2};
     m_timer = glfwGetTime();
 
-	TextureAtlas atlas(64,64);
-
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
 
@@ -65,7 +66,7 @@ auto GameLoop::loop() -> void {
         }
         m_frames++;
 
-        renderer.render(sprites);
+        renderer.render(sprites, atlas);
 
         glfwSwapBuffers(m_window);
     }
